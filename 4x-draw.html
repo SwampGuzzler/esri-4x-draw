@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
-        <title>Get started with SceneView - Create a 3D map - 4.2</title>
+        <title>Draw in 4!</title>
         <style>
             html, body, #viewDiv {
                 padding: 0;
@@ -21,9 +21,10 @@
                 font-size: 22px;
                 background-color: #21BAED;
                 color: white;
-                max-width: 120px;
+                max-width: 150px;
                 opacity: 0.85;
                 cursor: pointer;
+                text-align: center;
             }
         </style>
         <link rel="stylesheet" href="https://js.arcgis.com/4.3/esri/css/main.css">
@@ -53,6 +54,7 @@
                 window.mode = 'polygon';
                 var polyVertixes = [];
                 var progressPoly;
+                var progressLine;
                 var onlyLine;
 
                 view.then(function() {
@@ -167,19 +169,12 @@
                         });
                         view.graphics.add(options.feature);
 
-                        // progressPoly = new Graphic({
-                        //     geometry: line,
-                        //     symbol: new SimpleLineSymbol({
-                        //         color:  '#2c58f4', //[44, 88, 244],
-                        //         width: 4.5
-                        //     })
-                        // });
-                        // view.graphics.add(progressPoly);
-
                     } else {
                         var newLine = addVertex(options.feature.geometry, point);
                         updateFeature(newLine);
                         console.log(newLine.paths[0].length);
+
+                        view.graphics.remove(progressLine);
 
                         if (newLine.paths[0].length > 3) {
                           view.graphics.remove(progressPoly);
@@ -211,14 +206,16 @@
 
                           var tempLine2 = createLine(polyVertixes[polyVertixes.length - 2], polyVertixes[polyVertixes.length - 1]);
 
-                          var ll = new Graphic({
+                          progressLine = new Graphic({
                               geometry: tempLine2,
                               symbol: new SimpleLineSymbol({
                                   color: '#2c58f4', //[44, 88, 244],
                                   width: 4.5
                               })
                           });
-                          view.graphics.add(ll);
+
+                          view.graphics.add(progressLine);
+
                         } else {
 
                           var tempLine = createLine(polyVertixes[0], polyVertixes[1]);
@@ -232,8 +229,6 @@
                           });
                           view.graphics.add(progressPoly);
 
-                          // //TODO: Make progressPoly a LINE actually, and have it just those first two segments!
-                          // //I'll also have to do this above in the first half of the if (!options.feature) { clause!
                         }
                     }
                 }
@@ -259,18 +254,9 @@
                 }
 
                 function updateFeature(polyline) {
-                    // view.graphics.removeAll();
+
                     view.graphics.remove(options.feature);
 
-                    //TODO: our problem is that the vertixes of this polyline are different from the vertixes of our polyline,
-                    // which we know is correct. We need to replace the START of the polyline I think (as the end is our cursor) with
-                    // the LAST vertex in our polyVertixes array...
-
-                    //OR what if we just have this polyLine as ONLY the last segment (the purple poly should take up the rest), because its
-                    // really the Ongoing #21BAED line that is wrong, and the only thing the polyLine has right IS the last segment!
-                    //To do this maybe we could simply clear all of the paths off of that polyline but the last?
-
-                    //TODO: keep drawing the 'newFeature' with the proper symbol and all if we are in Freehand!
                     var leadingLine;
 
                     var leadingLineStart = {};
@@ -280,7 +266,6 @@
                     leadingLineEnd.x = polyline.paths[0][polyline.paths[0].length - 1][0];
                     leadingLineEnd.y = polyline.paths[0][polyline.paths[0].length - 1][1];
 
-                    // var leadingLine = createLine(leadingLineStart, leadingLineEnd);
                     if (polyVertixes.length > 1) {
 
                       var tempLine2 = createLine(polyVertixes[polyVertixes.length - 2], polyVertixes[polyVertixes.length - 1]);
@@ -439,6 +424,7 @@
 
                     view.graphics.remove(progressPoly);
                     view.graphics.remove(options.feature);
+                    view.graphics.remove(progressLine);
                     view.graphics.add(polygonGraphic)
 
                     options.feature = null;
