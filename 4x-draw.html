@@ -172,7 +172,6 @@
                     } else {
                         var newLine = addVertex(options.feature.geometry, point);
                         updateFeature(newLine);
-                        console.log(newLine.paths[0].length);
 
                         view.graphics.remove(progressLine);
 
@@ -311,16 +310,16 @@
                     });
                     options.feature = newFeature;
 
-                    //TODO: Remove yellow dotted lines that tell us topology is incorrect
+                    view.graphics.add(newFeature);
 
-                    if (options.intersectingFeature) {
-                        view.graphics.addMany([newFeature, options.intersectingFeature]);
-                    } else {
-                        view.graphics.add(newFeature);
-                        if (options.intersectingFeature && view.graphics.includes(options.intersectingFeature)) {
-                            view.graphics.remove(options.intersectingFeature);
-                        }
-                    }
+                    // if (options.intersectingFeature) {
+                    //     view.graphics.addMany([newFeature, options.intersectingFeature]);
+                    // } else {
+                    //     view.graphics.add(newFeature);
+                    //     if (options.intersectingFeature && view.graphics.includes(options.intersectingFeature)) {
+                    //         view.graphics.remove(options.intersectingFeature);
+                    //     }
+                    // }
                 }
 
                 function createLine(startPosition, endPosition) {
@@ -356,21 +355,21 @@
                     var lastPointIndex = line.paths[0].length - 1;
                     polyline.setPoint(0, lastPointIndex, newPoint);
 
-                    var intersectResults = isSelfIntersecting(polyline);
-                    var selfIntersects = intersectResults.selfIntersects;
-                    if (selfIntersects) {
-                        options.intersectingFeature = new Graphic({
-                            geometry: intersectResults.finalSegment,
-                            symbol: new SimpleLineSymbol({
-                                style: "short-dot",
-                                width: 2.5,
-                                color: "yellow"
-                            })
-                        });
-
-                    } else {
-                        options.intersectingFeature = null;
-                    }
+                    // var intersectResults = isSelfIntersecting(polyline);
+                    // var selfIntersects = intersectResults.selfIntersects;
+                    // if (selfIntersects) {
+                    //     options.intersectingFeature = new Graphic({
+                    //         geometry: intersectResults.finalSegment,
+                    //         symbol: new SimpleLineSymbol({
+                    //             style: "short-dot",
+                    //             width: 2.5,
+                    //             color: "yellow"
+                    //         })
+                    //     });
+                    //
+                    // } else {
+                    //     options.intersectingFeature = null;
+                    // }
 
                     return polyline;
                 }
