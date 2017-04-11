@@ -46,8 +46,8 @@
                 var view = new MapView({
                     container: "viewDiv",
                     map: map,
-                    zoom: 4,
-                    center: [-116.49859, 33.82434]
+                    zoom: 5,
+                    center: [-122.3, 47.6]
                 });
 
                 view.ui.add("switchDiv", "top-right");
@@ -62,37 +62,11 @@
                     on(view, "pointer-move", draw);
                     on(view, "double-click", finishDrawing);
                     on(view, "pointer-up", pointerUp);
+                    on(view, "drag", dragAndDraw);
 
-                    on(view, "drag", function (evt) {
-                      if (window.mode === 'polygon') {
-                          return;
-                      } else if (window.mode === 'freehand') {
-                        evt.stopPropagation();
-
-                        var screenPoint = new ScreenPoint({
-                          x: evt.x,
-                          y: evt.y
-                        });
-                        var point = view.toMap(screenPoint);
-
-                        if (!options.feature) {
-                            var line = createLine(point, point);
-                            options.feature = new Graphic({
-                                geometry: line,
-                                symbol: new SimpleLineSymbol({
-                                    color: "#21BAED",
-                                    width: 1.5
-                                })
-                            });
-                            view.graphics.add(options.feature);
-                        } else {
-                            var newLine = addVertex(options.feature.geometry, point);
-                            updateFeature(newLine);
-                        }
-                      }
-                    });
 
                     var switchDiv = dom.byId('switchDiv');
+
                     on(switchDiv, 'click', function() {
                       var displayDiv = dom.byId('displayDiv');
                       if (window.mode === 'polygon') {
@@ -105,6 +79,35 @@
                     });
 
                 });
+
+                function dragAndDraw(evt) {
+                  if (window.mode === 'polygon') {
+                      return;
+                  } else if (window.mode === 'freehand') {
+                    evt.stopPropagation();
+
+                    var screenPoint = new ScreenPoint({
+                      x: evt.x,
+                      y: evt.y
+                    });
+                    var point = view.toMap(screenPoint);
+
+                    if (!options.feature) {
+                        var line = createLine(point, point);
+                        options.feature = new Graphic({
+                            geometry: line,
+                            symbol: new SimpleLineSymbol({
+                                color: "#21BAED",
+                                width: 1.5
+                            })
+                        });
+                        view.graphics.add(options.feature);
+                    } else {
+                        var newLine = addVertex(options.feature.geometry, point);
+                        updateFeature(newLine);
+                    }
+                  }
+                }
 
                 function pointerUp(evt) {
                     if (window.mode === 'polygon') {
@@ -175,16 +178,18 @@
 
                         view.graphics.remove(progressLine);
 
+                        var tempLine;
+
                         if (newLine.paths[0].length > 3) {
                           view.graphics.remove(progressPoly);
 
-                          var rings2 = [];
+                          var rings = [];
                           for (var i = 0; i < polyVertixes.length; i++) {
-                            rings2.push([polyVertixes[i].longitude,polyVertixes[i].latitude]);
+                            rings.push([polyVertixes[i].longitude,polyVertixes[i].latitude]);
                           }
 
                           var polyGeom = new Polygon({
-                            rings: rings2
+                            rings: rings
                           });
 
                           var fillSymbol = new SimpleFillSymbol({
@@ -202,32 +207,23 @@
 
                           view.graphics.add(progressPoly);
 
-                          var tempLine2 = createLine(polyVertixes[polyVertixes.length - 2], polyVertixes[polyVertixes.length - 1]);
-
-                          progressLine = new Graphic({
-                              geometry: tempLine2,
-                              symbol: new SimpleLineSymbol({
-                                  color: '#2c58f4',
-                                  width: 4.5
-                              })
-                          });
-
-                          view.graphics.add(progressLine);
+                          tempLine = createLine(polyVertixes[polyVertixes.length - 2], polyVertixes[polyVertixes.length - 1]);
 
                         } else {
 
-                          var tempLine = createLine(polyVertixes[0], polyVertixes[1]);
-
-                          progressPoly = new Graphic({
-                              geometry: tempLine,
-                              symbol: new SimpleLineSymbol({
-                                  color: '#2c58f4',
-                                  width: 4.5
-                              })
-                          });
-                          view.graphics.add(progressPoly);
+                          tempLine = createLine(polyVertixes[0], polyVertixes[1]);
 
                         }
+
+                        progressLine = new Graphic({
+                            geometry: tempLine,
+                            symbol: new SimpleLineSymbol({
+                                color: '#2c58f4',
+                                width: 4.5
+                            })
+                        });
+
+                        view.graphics.add(progressLine);
                     }
                 }
 
@@ -266,10 +262,10 @@
 
                     if (polyVertixes.length > 1) {
 
-                      var tempLine2 = createLine(polyVertixes[polyVertixes.length - 2], polyVertixes[polyVertixes.length - 1]);
+                      var tempLine = createLine(polyVertixes[polyVertixes.length - 2], polyVertixes[polyVertixes.length - 1]);
 
                       var polyEdge = new Graphic({
-                        geometry: tempLine2,
+                        geometry: tempLine,
                         symbol: new SimpleLineSymbol({
                           color: 'red',
                           width: 2
@@ -328,9 +324,9 @@
                         return;
                     }
 
-                    var startPoint = [startPosition.x, startPosition.y, ];
+                    var startPoint = [startPosition.x, startPosition.y];
 
-                    var endPoint = [endPosition.x, endPosition.y, ];
+                    var endPoint = [endPosition.x, endPosition.y];
 
                     return new Polyline({
                         spatialReference: {
@@ -383,15 +379,14 @@
                     var point = evt.mapPoint;
 
                     polyVertixes.push(point);
-                    console.log('polyVertixes', polyVertixes);
 
-                    var rings2 = [];
+                    var rings = [];
                     for (var i = 0; i < polyVertixes.length; i++) {
-                      rings2.push([polyVertixes[i].longitude,polyVertixes[i].latitude]);
+                      rings.push([polyVertixes[i].longitude,polyVertixes[i].latitude]);
                     }
 
                     var polygon = new Polygon({
-                      rings: rings2
+                      rings: rings
                     });
 
                     var fillSymbol = new SimpleFillSymbol({
