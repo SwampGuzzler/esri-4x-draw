@@ -187,9 +187,8 @@
                             rings: rings2
                           });
 
-
                           var fillSymbol = new SimpleFillSymbol({
-                            color:  '#2c58f4', //[44, 88, 244, 0.8],
+                            color:  '#2c58f4',
                             outline: {
                               color: [255, 0, 0],
                               width: 1
@@ -208,7 +207,7 @@
                           progressLine = new Graphic({
                               geometry: tempLine2,
                               symbol: new SimpleLineSymbol({
-                                  color: '#2c58f4', //[44, 88, 244],
+                                  color: '#2c58f4',
                                   width: 4.5
                               })
                           });
@@ -222,7 +221,7 @@
                           progressPoly = new Graphic({
                               geometry: tempLine,
                               symbol: new SimpleLineSymbol({
-                                  color: '#2c58f4', //[44, 88, 244],
+                                  color: '#2c58f4',
                                   width: 4.5
                               })
                           });
@@ -269,14 +268,14 @@
 
                       var tempLine2 = createLine(polyVertixes[polyVertixes.length - 2], polyVertixes[polyVertixes.length - 1]);
 
-                      var ll = new Graphic({
+                      var polyEdge = new Graphic({
                         geometry: tempLine2,
                         symbol: new SimpleLineSymbol({
-                          color: 'red', //[44, 88, 244],
+                          color: 'red',
                           width: 2
                         })
                       });
-                      view.graphics.add(ll);
+                      view.graphics.add(polyEdge);
 
                       leadingLine = createLine(polyVertixes[polyVertixes.length - 1], leadingLineEnd);
 
@@ -289,7 +288,7 @@
                     onlyLine = new Graphic({
                       geometry: leadingLine,
                       symbol: new SimpleLineSymbol({
-                        color: 'red', //[44, 88, 244],
+                        color: 'red',
                         width: 2
                       })
                     });
@@ -421,9 +420,7 @@
 
                     updateFeature(finalLine);
 
-                    view.graphics.remove(progressPoly);
-                    view.graphics.remove(options.feature);
-                    view.graphics.remove(progressLine);
+                    view.graphics.removeAll();
                     view.graphics.add(polygonGraphic)
 
                     options.feature = null;
